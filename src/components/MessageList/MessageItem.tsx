@@ -1,9 +1,8 @@
 import React from 'react';
 import { EmailThread } from '../../types/mail';
 import { useMail } from '../../context/MailContext';
-import { Avatar } from '../Common/Avatar';
 import { AccountBadge } from '../Common/AccountBadge';
-import { Paperclip, Star, Archive, Trash2, Mail, MailOpen, Check } from 'lucide-react';
+import { Star, Archive, Trash2, Mail, MailOpen, Paperclip } from 'lucide-react';
 import { format, isToday, isYesterday } from 'date-fns';
 
 interface MessageItemProps {
@@ -21,7 +20,6 @@ export const MessageItem: React.FC<MessageItemProps> = ({ thread, isSelected }) 
     selectedMessageIds,
     setSelectedMessageIds,
     accounts,
-    settings,
   } = useMail();
 
   const isChecked = selectedMessageIds.has(thread.id);
@@ -30,7 +28,6 @@ export const MessageItem: React.FC<MessageItemProps> = ({ thread, isSelected }) 
     color: thread.accountColor,
   };
 
-  // Format date
   const formatThreadDate = (dateStr: string) => {
     try {
       const date = new Date(dateStr);
@@ -73,143 +70,137 @@ export const MessageItem: React.FC<MessageItemProps> = ({ thread, isSelected }) 
   };
 
   const sender = thread.participants[0] || { name: 'Unknown', email: '' };
+  const lastMsg = thread.messages[thread.messages.length - 1];
 
   return (
     <div
       onClick={() => selectThread(thread.id)}
-      className={`group relative flex flex-col px-3.5 py-3 border-b border-black/5 dark:border-white/5 transition-all cursor-pointer select-none ${
+      className={`group relative flex flex-col px-4 py-3 border-b border-[#f0f2f5] dark:border-[#28292a] transition-all cursor-pointer select-none text-xs ${
         isSelected
-          ? 'bg-blue-500/12 dark:bg-blue-600/20 shadow-xs'
+          ? 'bg-[#c2e7ff]/40 dark:bg-[#004a77]/35 border-l-4 border-l-[#0b57d0] dark:border-l-[#a8c7fa]'
           : thread.isRead
-          ? 'bg-white/60 dark:bg-[#191b22]/40 hover:bg-black/4 dark:hover:bg-white/4'
-          : 'bg-white dark:bg-[#1e2029] hover:bg-blue-50/40 dark:hover:bg-blue-950/20'
+          ? 'bg-white dark:bg-[#131314] hover:bg-[#f6f8fc] dark:hover:bg-[#1e1f20]'
+          : 'bg-[#f2f6fc] dark:bg-[#1a2230] hover:bg-[#eaf1fb] dark:hover:bg-[#1f2838]'
       }`}
     >
-      {/* Active Left Indicator Bar */}
-      {isSelected && (
-        <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 dark:bg-blue-500 rounded-r" />
-      )}
-
-      {/* Top Row: Sender Info, Badges, Date */}
-      <div className="flex items-center justify-between gap-2 mb-1">
-        <div className="flex items-center gap-2 min-w-0">
-          {/* Unread indicator dot */}
-          {!thread.isRead && (
-            <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0 shadow-xs ring-2 ring-blue-400/20" />
-          )}
-
-          {/* Sender Avatar */}
-          <Avatar
-            name={sender.name}
-            email={sender.email}
-            avatarUrl={sender.avatarUrl}
-            size="sm"
-            className="w-5 h-5 text-[10px]"
+      {/* ROW 1: Checkbox + Star + Sender Name + Date / Hover Action Bar */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <input
+            type="checkbox"
+            checked={isChecked}
+            onClick={handleCheckboxToggle}
+            onChange={() => {}}
+            className="rounded text-[#0b57d0] cursor-pointer shrink-0"
           />
 
-          {/* Sender Name */}
+          <button
+            onClick={handleStarToggle}
+            className={`p-0.5 rounded cursor-pointer transition-colors shrink-0 ${
+              thread.isStarred
+                ? 'text-[#fbbc04] fill-[#fbbc04]'
+                : 'text-[#c4c7c5] hover:text-[#444746]'
+            }`}
+          >
+            <Star className={`w-3.5 h-3.5 ${thread.isStarred ? 'fill-current' : ''}`} />
+          </button>
+
           <span
             className={`truncate text-xs ${
               !thread.isRead
-                ? 'font-bold text-slate-900 dark:text-white'
-                : 'font-medium text-slate-700 dark:text-slate-300'
+                ? 'font-bold text-[#1f1f1f] dark:text-[#e3e3e3]'
+                : 'font-medium text-[#444746] dark:text-[#c4c7c5]'
             }`}
           >
             {sender.name || sender.email}
           </span>
 
           {thread.messageCount > 1 && (
-            <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 bg-black/5 dark:bg-white/10 px-1.5 py-0.2 rounded-md">
-              {thread.messageCount}
+            <span className="text-[11px] text-[#747775] dark:text-[#8e918f] font-normal shrink-0">
+              ({thread.messageCount})
             </span>
           )}
         </div>
 
-        <div className="flex items-center gap-1.5 shrink-0">
-          {/* Account Badge in list */}
-          <AccountBadge account={account} size="xs" showName={true} />
-
-          {/* Date */}
-          <span
-            className={`text-[11px] ${
+        {/* Date & Hover Actions on Right */}
+        <div className="relative shrink-0 flex items-center justify-end min-w-[70px]">
+          {/* Default Date Text */}
+          <time
+            className={`group-hover:hidden text-[11px] text-right ${
               !thread.isRead
-                ? 'font-semibold text-blue-600 dark:text-blue-400'
-                : 'text-slate-400 dark:text-slate-500'
+                ? 'font-bold text-[#1f1f1f] dark:text-[#e3e3e3]'
+                : 'text-[#747775] dark:text-[#8e918f]'
             }`}
           >
             {formatThreadDate(thread.lastMessageDate)}
-          </span>
+          </time>
+
+          {/* Hover Actions Bar */}
+          <div className="hidden group-hover:flex items-center gap-1 bg-white/90 dark:bg-[#1e1f20]/90 backdrop-blur-xs pl-1.5 rounded-lg">
+            <button
+              onClick={handleArchive}
+              className="p-1 text-[#444746] dark:text-[#c4c7c5] hover:text-[#1f1f1f] dark:hover:text-white hover:bg-[#e0e2e6] dark:hover:bg-[#333538] rounded transition-colors cursor-pointer"
+              title="Archive"
+            >
+              <Archive className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={handleTrash}
+              className="p-1 text-[#444746] dark:text-[#c4c7c5] hover:text-[#ea4335] hover:bg-[#fce8e6] dark:hover:bg-[#3b2020] rounded transition-colors cursor-pointer"
+              title="Delete"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={handleToggleRead}
+              className="p-1 text-[#444746] dark:text-[#c4c7c5] hover:text-[#1f1f1f] dark:hover:text-white hover:bg-[#e0e2e6] dark:hover:bg-[#333538] rounded transition-colors cursor-pointer"
+              title={thread.isRead ? 'Mark unread' : 'Mark read'}
+            >
+              {thread.isRead ? <Mail className="w-3.5 h-3.5" /> : <MailOpen className="w-3.5 h-3.5" />}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Middle Row: Subject */}
-      <div className="flex items-center justify-between gap-2 mt-0.5">
-        <h4
-          className={`text-xs truncate ${
+      {/* ROW 2: Subject Line + Account Badge */}
+      <div className="flex items-center justify-between gap-2 mt-1 pl-6">
+        <span
+          className={`truncate text-xs flex-1 ${
             !thread.isRead
-              ? 'font-bold text-slate-900 dark:text-slate-100'
-              : 'font-medium text-slate-800 dark:text-slate-200'
+              ? 'font-bold text-[#1f1f1f] dark:text-[#e3e3e3]'
+              : 'font-normal text-[#1f1f1f] dark:text-[#c4c7c5]'
           }`}
         >
-          {thread.subject || '(No Subject)'}
-        </h4>
+          {thread.subject || '(no subject)'}
+        </span>
 
-        {/* Icons (Attachments & Star) */}
-        <div className="flex items-center gap-1 shrink-0">
-          {thread.hasAttachments && (
-            <Paperclip className="w-3 h-3 text-slate-400 shrink-0" />
-          )}
-
-          <button
-            onClick={handleStarToggle}
-            className={`p-0.5 rounded transition-colors cursor-pointer ${
-              thread.isStarred
-                ? 'text-amber-500 fill-amber-500'
-                : 'text-slate-300 dark:text-slate-600 hover:text-amber-400'
-            }`}
-          >
-            <Star className={`w-3.5 h-3.5 ${thread.isStarred ? 'fill-current' : ''}`} />
-          </button>
-        </div>
+        <AccountBadge account={account} size="xs" />
       </div>
 
-      {/* Bottom Row: Snippet */}
-      <p
-        className={`text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-snug ${
-          settings.snippetLines === 1
-            ? 'truncate'
-            : settings.snippetLines === 3
-            ? 'line-clamp-3'
-            : 'line-clamp-2'
-        }`}
-      >
+      {/* ROW 3: Snippet Preview */}
+      <p className="text-[11px] text-[#5e5e5e] dark:text-[#8e918f] line-clamp-1 mt-0.5 pl-6 font-normal">
         {thread.snippet}
       </p>
 
-      {/* Floating Hover Action Toolbar */}
-      <div className="absolute right-2 bottom-2 hidden group-hover:flex items-center gap-0.5 bg-white/95 dark:bg-[#252834]/95 backdrop-blur-md px-1 py-0.5 rounded-lg border border-black/10 dark:border-white/10 shadow-md">
-        <button
-          onClick={handleArchive}
-          className="p-1 hover:bg-black/5 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 rounded transition-colors cursor-pointer"
-          title="Archive (e)"
-        >
-          <Archive className="w-3.5 h-3.5" />
-        </button>
-        <button
-          onClick={handleTrash}
-          className="p-1 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-600 dark:text-slate-300 hover:text-rose-600 rounded transition-colors cursor-pointer"
-          title="Delete (#)"
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-        </button>
-        <button
-          onClick={handleToggleRead}
-          className="p-1 hover:bg-black/5 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 rounded transition-colors cursor-pointer"
-          title={thread.isRead ? 'Mark Unread (u)' : 'Mark Read (u)'}
-        >
-          {thread.isRead ? <Mail className="w-3.5 h-3.5" /> : <MailOpen className="w-3.5 h-3.5" />}
-        </button>
-      </div>
+      {/* ROW 4: Attachment Pills (Placed neatly below, NEVER overlapping date) */}
+      {thread.hasAttachments && lastMsg?.attachments && lastMsg.attachments.length > 0 && (
+        <div className="flex items-center gap-1.5 flex-wrap mt-1.5 pl-6">
+          {lastMsg.attachments.slice(0, 2).map(att => (
+            <span
+              key={att.id}
+              className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#f0f4f9] dark:bg-[#282a2c] text-[#444746] dark:text-[#c4c7c5] rounded-md text-[10px] font-medium border border-[#e0e3e7] dark:border-[#444746] max-w-[150px] truncate"
+            >
+              <Paperclip className="w-2.5 h-2.5 text-[#0b57d0] dark:text-[#a8c7fa] shrink-0" />
+              <span className="truncate">{att.filename}</span>
+            </span>
+          ))}
+          {lastMsg.attachments.length > 2 && (
+            <span className="text-[10px] text-[#747775] font-medium">
+              +{lastMsg.attachments.length - 2} more
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 };

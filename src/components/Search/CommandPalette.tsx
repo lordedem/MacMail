@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useMail } from '../../context/MailContext';
 import {
   Search,
-  PenSquare,
+  Pencil,
   Inbox,
   Star,
   RefreshCw,
@@ -12,7 +12,6 @@ import {
   Sun,
   Mail,
   ArrowRight,
-  Sparkles,
 } from 'lucide-react';
 import { AccountBadge } from '../Common/AccountBadge';
 
@@ -29,7 +28,6 @@ export const CommandPalette: React.FC = () => {
     setIsSettingsOpen,
     accounts,
     updateSettings,
-    settings,
   } = useMail();
 
   const [query, setQuery] = useState('');
@@ -46,48 +44,47 @@ export const CommandPalette: React.FC = () => {
 
   if (!isCommandPaletteOpen) return null;
 
-  // Actions list
   const ACTIONS = [
     {
       id: 'act_compose',
-      title: 'Compose New Email',
-      shortcut: '⌘N',
-      icon: <PenSquare className="w-4 h-4 text-blue-500" />,
+      title: 'Compose new message',
+      shortcut: 'c',
+      icon: <Pencil className="w-4 h-4 text-[#0b57d0]" />,
       run: () => openCompose('new'),
     },
     {
       id: 'act_all_inboxes',
-      title: 'Go to All Inboxes',
-      shortcut: '⌘1',
-      icon: <Inbox className="w-4 h-4 text-blue-500" />,
-      run: () => setNavigation({ scope: 'all', folderType: 'inbox', title: 'All Inboxes' }),
+      title: 'Go to All inboxes',
+      shortcut: '',
+      icon: <Inbox className="w-4 h-4 text-[#0b57d0]" />,
+      run: () => setNavigation({ scope: 'all', folderType: 'inbox', title: 'All inboxes' }),
     },
     {
       id: 'act_starred',
       title: 'Go to Starred',
-      shortcut: '⌘2',
-      icon: <Star className="w-4 h-4 text-amber-500" />,
-      run: () => setNavigation({ scope: 'all', folderType: 'starred', title: 'All Starred' }),
+      shortcut: '',
+      icon: <Star className="w-4 h-4 text-[#fbbc04] fill-current" />,
+      run: () => setNavigation({ scope: 'all', folderType: 'starred', title: 'Starred' }),
     },
     {
       id: 'act_sync',
-      title: 'Sync All Mailboxes Now',
+      title: 'Sync all accounts',
       shortcut: '⌘R',
-      icon: <RefreshCw className="w-4 h-4 text-emerald-500" />,
+      icon: <RefreshCw className="w-4 h-4 text-[#34a853]" />,
       run: () => syncAllAccounts(),
     },
     {
       id: 'act_add_account',
-      title: 'Connect New Account...',
+      title: 'Add another account',
       shortcut: '',
-      icon: <Plus className="w-4 h-4 text-purple-500" />,
+      icon: <Plus className="w-4 h-4 text-[#0b57d0]" />,
       run: () => setIsAddAccountOpen(true),
     },
     {
       id: 'act_toggle_theme',
-      title: 'Toggle Dark / Light Theme',
-      shortcut: '⌘D',
-      icon: <Moon className="w-4 h-4 text-indigo-400" />,
+      title: 'Toggle Dark / Light theme',
+      shortcut: '',
+      icon: <Moon className="w-4 h-4 text-[#747775]" />,
       run: () => {
         const isDark = document.documentElement.classList.contains('dark');
         if (isDark) {
@@ -101,9 +98,9 @@ export const CommandPalette: React.FC = () => {
     },
     {
       id: 'act_settings',
-      title: 'Preferences & Settings...',
-      shortcut: '⌘,',
-      icon: <SettingsIcon className="w-4 h-4 text-slate-400" />,
+      title: 'Settings',
+      shortcut: '',
+      icon: <SettingsIcon className="w-4 h-4 text-[#747775]" />,
       run: () => setIsSettingsOpen(true),
     },
   ];
@@ -113,7 +110,7 @@ export const CommandPalette: React.FC = () => {
   );
 
   const matchedEmails = query.trim()
-    ? filteredThreads.slice(0, 5)
+    ? filteredThreads.slice(0, 6)
     : [];
 
   const totalItems = matchedActions.length + matchedEmails.length;
@@ -146,15 +143,15 @@ export const CommandPalette: React.FC = () => {
   return (
     <div
       onClick={() => setIsCommandPaletteOpen(false)}
-      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-md flex items-start justify-center pt-24 px-4 select-none animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-start justify-center pt-20 px-4 select-none animate-in fade-in duration-150"
     >
       <div
         onClick={e => e.stopPropagation()}
-        className="w-full max-w-xl bg-white/95 dark:bg-[#191b22]/95 backdrop-blur-2xl border border-black/12 dark:border-white/12 rounded-2xl shadow-2xl overflow-hidden font-sans flex flex-col"
+        className="w-full max-w-xl bg-white dark:bg-[#1e1f20] border border-[#e0e3e7] dark:border-[#333538] rounded-3xl shadow-2xl overflow-hidden font-sans flex flex-col"
       >
-        {/* Search input bar */}
-        <div className="flex items-center px-4 py-3.5 border-b border-black/8 dark:border-white/8 gap-3">
-          <Search className="w-4 h-4 text-blue-500 shrink-0" />
+        {/* Google Search input bar */}
+        <div className="flex items-center px-5 py-4 border-b border-[#f2f2f2] dark:border-[#2b2c2e] gap-3.5 bg-[#f6f8fc] dark:bg-[#282a2c]">
+          <Search className="w-5 h-5 text-[#0b57d0] dark:text-[#a8c7fa] shrink-0" />
           <input
             ref={inputRef}
             type="text"
@@ -164,21 +161,20 @@ export const CommandPalette: React.FC = () => {
               setSelectedIndex(0);
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Type a command or search all inboxes..."
-            className="w-full bg-transparent text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 outline-none"
+            placeholder="Search all inboxes or jump to..."
+            className="w-full bg-transparent text-sm text-[#1f1f1f] dark:text-[#e3e3e3] placeholder-[#747775] outline-none font-medium"
           />
-          <kbd className="text-[10px] text-slate-400 bg-black/5 dark:bg-white/10 px-1.5 py-0.5 rounded font-mono">
+          <kbd className="text-[10px] text-[#747775] bg-white dark:bg-[#1e1f20] border border-[#e0e3e7] dark:border-[#444746] px-2 py-0.5 rounded font-mono">
             ESC
           </kbd>
         </div>
 
         {/* Results List */}
         <div className="max-h-80 overflow-y-auto p-2 space-y-1 scrollbar-thin">
-          {/* Actions Section */}
           {matchedActions.length > 0 && (
             <div>
-              <div className="px-3 py-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                Quick Actions
+              <div className="px-3 py-1 text-[10px] font-bold text-[#747775] uppercase tracking-wider">
+                Commands
               </div>
               {matchedActions.map((action, idx) => {
                 const isSelected = selectedIndex === idx;
@@ -190,23 +186,23 @@ export const CommandPalette: React.FC = () => {
                       setIsCommandPaletteOpen(false);
                     }}
                     onMouseEnter={() => setSelectedIndex(idx)}
-                    className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium cursor-pointer transition-colors ${
+                    className={`flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-medium cursor-pointer transition-colors ${
                       isSelected
-                        ? 'bg-blue-600 text-white shadow-xs'
-                        : 'text-slate-700 dark:text-slate-200 hover:bg-black/4 dark:hover:bg-white/4'
+                        ? 'bg-[#d3e3fd] text-[#041e49] dark:bg-[#004a77] dark:text-[#c2e7ff] font-bold'
+                        : 'text-[#444746] dark:text-[#c4c7c5] hover:bg-[#f6f8fc] dark:hover:bg-[#28292a]'
                     }`}
                   >
-                    <div className="flex items-center gap-2.5">
-                      <div className={isSelected ? 'text-white' : ''}>{action.icon}</div>
+                    <div className="flex items-center gap-3">
+                      <div>{action.icon}</div>
                       <span>{action.title}</span>
                     </div>
 
                     {action.shortcut && (
                       <kbd
-                        className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                        className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
                           isSelected
-                            ? 'bg-white/20 text-white'
-                            : 'bg-black/5 dark:bg-white/10 text-slate-400'
+                            ? 'bg-white/40 text-[#041e49]'
+                            : 'bg-black/5 dark:bg-white/10 text-[#747775]'
                         }`}
                       >
                         {action.shortcut}
@@ -218,10 +214,9 @@ export const CommandPalette: React.FC = () => {
             </div>
           )}
 
-          {/* Email Results Section */}
           {matchedEmails.length > 0 && (
-            <div className="mt-2 pt-2 border-t border-black/5 dark:border-white/5">
-              <div className="px-3 py-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+            <div className="mt-2 pt-2 border-t border-[#f2f2f2] dark:border-[#2b2c2e]">
+              <div className="px-3 py-1 text-[10px] font-bold text-[#747775] uppercase tracking-wider">
                 Matching Conversations (All Inboxes)
               </div>
               {matchedEmails.map((thread, i) => {
@@ -237,19 +232,19 @@ export const CommandPalette: React.FC = () => {
                       setIsCommandPaletteOpen(false);
                     }}
                     onMouseEnter={() => setSelectedIndex(itemIndex)}
-                    className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs cursor-pointer transition-colors ${
+                    className={`flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs cursor-pointer transition-colors ${
                       isSelected
-                        ? 'bg-blue-600 text-white shadow-xs'
-                        : 'text-slate-700 dark:text-slate-200 hover:bg-black/4 dark:hover:bg-white/4'
+                        ? 'bg-[#d3e3fd] text-[#041e49] dark:bg-[#004a77] dark:text-[#c2e7ff] font-bold'
+                        : 'text-[#444746] dark:text-[#c4c7c5] hover:bg-[#f6f8fc] dark:hover:bg-[#28292a]'
                     }`}
                   >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <Mail className="w-3.5 h-3.5 shrink-0" />
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Mail className="w-4 h-4 shrink-0 text-[#0b57d0]" />
                       <div className="min-w-0">
                         <p className="font-semibold truncate text-xs">{thread.subject}</p>
                         <p
                           className={`text-[11px] truncate ${
-                            isSelected ? 'text-blue-100' : 'text-slate-400'
+                            isSelected ? 'text-[#041e49]' : 'text-[#747775]'
                           }`}
                         >
                           {thread.snippet}
@@ -259,7 +254,7 @@ export const CommandPalette: React.FC = () => {
 
                     <div className="flex items-center gap-2 shrink-0">
                       <AccountBadge account={acc} size="xs" />
-                      <ArrowRight className="w-3 h-3 opacity-60" />
+                      <ArrowRight className="w-3.5 h-3.5 opacity-60" />
                     </div>
                   </div>
                 );
@@ -268,16 +263,10 @@ export const CommandPalette: React.FC = () => {
           )}
 
           {totalItems === 0 && (
-            <div className="py-8 text-center text-xs text-slate-400">
+            <div className="py-8 text-center text-xs text-[#747775]">
               No matching commands or emails found.
             </div>
           )}
-        </div>
-
-        {/* Footer */}
-        <div className="px-4 py-2 border-t border-black/5 dark:border-white/5 flex items-center justify-between text-[11px] text-slate-400 bg-slate-50/50 dark:bg-white/2">
-          <span>Navigate with ↑ ↓, press Enter to select</span>
-          <span className="font-semibold text-blue-500">MacMail Universal Command</span>
         </div>
       </div>
     </div>

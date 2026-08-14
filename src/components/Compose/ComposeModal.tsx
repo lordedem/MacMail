@@ -7,10 +7,7 @@ import {
   Maximize2,
   Minimize2,
   Paperclip,
-  Send,
   Trash2,
-  Clock,
-  ChevronDown,
   Bold,
   Italic,
   Underline,
@@ -19,9 +16,9 @@ import {
   Quote,
   Code,
   Link2,
-  Sparkles,
   File,
-  Check,
+  ChevronDown,
+  AlignLeft,
 } from 'lucide-react';
 import { AccountBadge } from '../Common/AccountBadge';
 
@@ -32,6 +29,7 @@ export const ComposeModal: React.FC = () => {
   const [showBcc, setShowBcc] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
+  const [showFormatting, setShowFormatting] = useState(true);
   const [toInput, setToInput] = useState('');
   const [ccInput, setCcInput] = useState('');
   const [bccInput, setBccInput] = useState('');
@@ -42,7 +40,6 @@ export const ComposeModal: React.FC = () => {
 
   const { draft, mode } = composeState;
 
-  // Initialize body into editor content editable
   useEffect(() => {
     if (editorRef.current && draft.bodyHtml && !editorRef.current.innerHTML) {
       editorRef.current.innerHTML = draft.bodyHtml;
@@ -57,7 +54,6 @@ export const ComposeModal: React.FC = () => {
     const acc = accounts.find(a => a.id === accountId);
     let newBody = draft.bodyHtml;
 
-    // Append new signature if available
     if (acc?.signature) {
       newBody += `<br/><br/>--<br/>${acc.signature.replace(/\n/g, '<br/>')}`;
     }
@@ -107,7 +103,6 @@ export const ComposeModal: React.FC = () => {
     }
   };
 
-  // Rich Text Formatting Execution
   const formatText = (command: string, value: string | undefined = undefined) => {
     document.execCommand(command, false, value);
     if (editorRef.current) {
@@ -134,7 +129,6 @@ export const ComposeModal: React.FC = () => {
   };
 
   const handleSend = async () => {
-    // If user left text in toInput, add it before sending
     if (toInput.trim() && !draft.to.includes(toInput.trim())) {
       draft.to.push(toInput.trim());
     }
@@ -150,20 +144,20 @@ export const ComposeModal: React.FC = () => {
 
   if (isMinimized) {
     return (
-      <div className="fixed bottom-4 right-8 z-50 w-72 bg-white dark:bg-[#1e2029] border border-black/10 dark:border-white/10 rounded-t-xl shadow-2xl flex items-center justify-between p-3 cursor-pointer">
-        <span className="text-xs font-semibold truncate text-slate-800 dark:text-slate-200">
+      <div className="fixed bottom-0 right-16 z-50 w-72 bg-[#f2f6fc] dark:bg-[#1e1f20] border border-[#e0e3e7] dark:border-[#333538] rounded-t-xl shadow-lg flex items-center justify-between px-4 py-2.5 cursor-pointer">
+        <span className="text-xs font-semibold truncate text-[#1f1f1f] dark:text-[#e3e3e3]">
           {draft.subject || 'New Message'}
         </span>
         <div className="flex items-center gap-1">
           <button
             onClick={() => setIsMinimized(false)}
-            className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded text-slate-500"
+            className="p-1 hover:bg-[#e0e3e7] dark:hover:bg-[#28292a] rounded text-[#444746]"
           >
             <Maximize2 className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={closeCompose}
-            className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded text-slate-500"
+            className="p-1 hover:bg-[#e0e3e7] dark:hover:bg-[#28292a] rounded text-[#444746]"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -174,47 +168,44 @@ export const ComposeModal: React.FC = () => {
 
   return (
     <div
-      className={`fixed z-50 transition-all ${
+      className={`fixed z-50 transition-all duration-200 ${
         isMaximized
           ? 'inset-6'
-          : 'bottom-6 right-8 w-full max-w-2xl h-[580px]'
-      } bg-white dark:bg-[#191b22] border border-black/12 dark:border-white/12 rounded-2xl shadow-2xl shadow-black/25 flex flex-col overflow-hidden font-sans`}
+          : 'bottom-0 right-16 w-full max-w-[560px] h-[540px]'
+      } bg-white dark:bg-[#1e1f20] border border-[#e0e3e7] dark:border-[#333538] rounded-t-2xl shadow-2xl flex flex-col overflow-hidden font-sans`}
     >
-      {/* Compose Window Header (macOS title style) */}
-      <div className="h-10 px-4 bg-[#f4f5f8] dark:bg-[#1e2029] border-b border-black/8 dark:border-white/8 flex items-center justify-between shrink-0 select-none">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-slate-800 dark:text-slate-100">
-            {mode === 'new'
-              ? 'New Message'
-              : mode === 'reply'
-              ? 'Reply'
-              : mode === 'reply-all'
-              ? 'Reply All'
-              : 'Forward'}
-          </span>
-          <span className="text-[10px] text-slate-400 font-medium">Auto-saved to Drafts</span>
-        </div>
+      {/* Gmail Window Header */}
+      <div className="h-10 px-4 bg-[#f2f6fc] dark:bg-[#282a2c] border-b border-[#e0e3e7] dark:border-[#333538] flex items-center justify-between shrink-0 select-none">
+        <span className="text-xs font-bold text-[#1f1f1f] dark:text-[#e3e3e3]">
+          {mode === 'new'
+            ? 'New Message'
+            : mode === 'reply'
+            ? 'Reply'
+            : mode === 'reply-all'
+            ? 'Reply All'
+            : 'Forward'}
+        </span>
 
         {/* Window controls */}
         <div className="flex items-center gap-1">
           <button
             onClick={() => setIsMinimized(true)}
-            className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-black/5 dark:hover:bg-white/10 rounded transition-colors cursor-pointer"
+            className="p-1 text-[#444746] dark:text-[#c4c7c5] hover:bg-[#e0e3e7] dark:hover:bg-[#333538] rounded transition-colors cursor-pointer"
             title="Minimize"
           >
             <Minus className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => setIsMaximized(prev => !prev)}
-            className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-black/5 dark:hover:bg-white/10 rounded transition-colors cursor-pointer"
-            title={isMaximized ? 'Restore' : 'Maximize'}
+            className="p-1 text-[#444746] dark:text-[#c4c7c5] hover:bg-[#e0e3e7] dark:hover:bg-[#333538] rounded transition-colors cursor-pointer"
+            title={isMaximized ? 'Exit full screen' : 'Full screen'}
           >
             {isMaximized ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
           </button>
           <button
             onClick={closeCompose}
-            className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded transition-colors cursor-pointer"
-            title="Close"
+            className="p-1 text-[#444746] dark:text-[#c4c7c5] hover:bg-[#e0e3e7] dark:hover:bg-[#333538] rounded transition-colors cursor-pointer"
+            title="Save & close"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -222,16 +213,16 @@ export const ComposeModal: React.FC = () => {
       </div>
 
       {/* Account Selector ("From:") */}
-      <div className="px-4 py-2 border-b border-black/5 dark:border-white/5 flex items-center justify-between gap-3 text-xs bg-slate-50/50 dark:bg-white/2">
+      <div className="px-4 py-2 border-b border-[#f2f2f2] dark:border-[#2b2c2e] flex items-center justify-between gap-2 text-xs">
         <div className="flex items-center gap-2 min-w-0">
-          <span className="text-slate-400 font-medium shrink-0">From:</span>
+          <span className="text-[#747775] font-medium shrink-0">From:</span>
           <select
             value={draft.accountId}
             onChange={e => handleAccountChange(e.target.value)}
-            className="bg-transparent font-semibold text-slate-800 dark:text-slate-100 outline-none cursor-pointer hover:text-blue-600 transition-colors"
+            className="bg-transparent font-semibold text-[#1f1f1f] dark:text-[#e3e3e3] outline-none cursor-pointer hover:text-[#0b57d0] transition-colors"
           >
             {accounts.map(acc => (
-              <option key={acc.id} value={acc.id} className="bg-white dark:bg-[#191b22] text-slate-800 dark:text-slate-100">
+              <option key={acc.id} value={acc.id} className="bg-white dark:bg-[#1e1f20] text-[#1f1f1f] dark:text-[#e3e3e3]">
                 {acc.name} &lt;{acc.email}&gt;
               </option>
             ))}
@@ -242,19 +233,19 @@ export const ComposeModal: React.FC = () => {
       </div>
 
       {/* Recipients: To */}
-      <div className="px-4 py-2 border-b border-black/5 dark:border-white/5 flex items-center gap-2 text-xs flex-wrap">
-        <span className="text-slate-400 font-medium shrink-0">To:</span>
+      <div className="px-4 py-2 border-b border-[#f2f2f2] dark:border-[#2b2c2e] flex items-center gap-2 text-xs flex-wrap">
+        <span className="text-[#747775] font-medium shrink-0">To:</span>
 
         <div className="flex items-center gap-1.5 flex-wrap flex-1 min-w-[200px]">
           {draft.to.map(email => (
             <span
               key={email}
-              className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 rounded-md font-medium text-xs"
+              className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-[#f0f4f9] dark:bg-[#282a2c] text-[#1f1f1f] dark:text-[#e3e3e3] border border-[#c4c7c5] dark:border-[#444746] rounded-full text-xs"
             >
               <span>{email}</span>
               <button
                 onClick={() => removeToRecipient(email)}
-                className="hover:text-rose-500 cursor-pointer"
+                className="hover:text-[#ea4335] cursor-pointer"
               >
                 <X className="w-3 h-3" />
               </button>
@@ -266,16 +257,16 @@ export const ComposeModal: React.FC = () => {
             value={toInput}
             onChange={e => setToInput(e.target.value)}
             onKeyDown={handleToKeyDown}
-            placeholder={draft.to.length === 0 ? 'Enter email address and press Enter...' : ''}
-            className="flex-1 min-w-[140px] bg-transparent outline-none text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400"
+            placeholder={draft.to.length === 0 ? 'Recipients' : ''}
+            className="flex-1 min-w-[140px] bg-transparent outline-none text-xs text-[#1f1f1f] dark:text-[#e3e3e3] placeholder-[#747775]"
           />
         </div>
 
-        <div className="flex items-center gap-2 shrink-0 text-slate-400 text-xs">
+        <div className="flex items-center gap-2 shrink-0 text-[#747775] text-xs">
           {!showCc && (
             <button
               onClick={() => setShowCc(true)}
-              className="hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer font-medium"
+              className="hover:text-[#1f1f1f] dark:hover:text-white cursor-pointer font-medium"
             >
               Cc
             </button>
@@ -283,7 +274,7 @@ export const ComposeModal: React.FC = () => {
           {!showBcc && (
             <button
               onClick={() => setShowBcc(true)}
-              className="hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer font-medium"
+              className="hover:text-[#1f1f1f] dark:hover:text-white cursor-pointer font-medium"
             >
               Bcc
             </button>
@@ -293,18 +284,18 @@ export const ComposeModal: React.FC = () => {
 
       {/* Optional Cc Field */}
       {showCc && (
-        <div className="px-4 py-1.5 border-b border-black/5 dark:border-white/5 flex items-center gap-2 text-xs">
-          <span className="text-slate-400 font-medium shrink-0">Cc:</span>
+        <div className="px-4 py-1.5 border-b border-[#f2f2f2] dark:border-[#2b2c2e] flex items-center gap-2 text-xs">
+          <span className="text-[#747775] font-medium shrink-0">Cc:</span>
           <div className="flex items-center gap-1.5 flex-wrap flex-1">
             {draft.cc.map(email => (
               <span
                 key={email}
-                className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-200 dark:bg-slate-800 rounded-md text-xs"
+                className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#f0f4f9] dark:bg-[#282a2c] rounded-full text-xs"
               >
                 <span>{email}</span>
                 <button
                   onClick={() => updateDraft({ cc: draft.cc.filter(e => e !== email) })}
-                  className="hover:text-rose-500 cursor-pointer"
+                  className="hover:text-[#ea4335] cursor-pointer"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -316,7 +307,7 @@ export const ComposeModal: React.FC = () => {
               onChange={e => setCcInput(e.target.value)}
               onKeyDown={handleCcKeyDown}
               placeholder="Add Cc..."
-              className="flex-1 bg-transparent outline-none text-xs text-slate-800 dark:text-slate-100"
+              className="flex-1 bg-transparent outline-none text-xs text-[#1f1f1f] dark:text-[#e3e3e3]"
             />
           </div>
         </div>
@@ -324,18 +315,18 @@ export const ComposeModal: React.FC = () => {
 
       {/* Optional Bcc Field */}
       {showBcc && (
-        <div className="px-4 py-1.5 border-b border-black/5 dark:border-white/5 flex items-center gap-2 text-xs">
-          <span className="text-slate-400 font-medium shrink-0">Bcc:</span>
+        <div className="px-4 py-1.5 border-b border-[#f2f2f2] dark:border-[#2b2c2e] flex items-center gap-2 text-xs">
+          <span className="text-[#747775] font-medium shrink-0">Bcc:</span>
           <div className="flex items-center gap-1.5 flex-wrap flex-1">
             {draft.bcc.map(email => (
               <span
                 key={email}
-                className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-200 dark:bg-slate-800 rounded-md text-xs"
+                className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#f0f4f9] dark:bg-[#282a2c] rounded-full text-xs"
               >
                 <span>{email}</span>
                 <button
                   onClick={() => updateDraft({ bcc: draft.bcc.filter(e => e !== email) })}
-                  className="hover:text-rose-500 cursor-pointer"
+                  className="hover:text-[#ea4335] cursor-pointer"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -347,94 +338,25 @@ export const ComposeModal: React.FC = () => {
               onChange={e => setBccInput(e.target.value)}
               onKeyDown={handleBccKeyDown}
               placeholder="Add Bcc..."
-              className="flex-1 bg-transparent outline-none text-xs text-slate-800 dark:text-slate-100"
+              className="flex-1 bg-transparent outline-none text-xs text-[#1f1f1f] dark:text-[#e3e3e3]"
             />
           </div>
         </div>
       )}
 
       {/* Subject Line */}
-      <div className="px-4 py-2 border-b border-black/5 dark:border-white/5 flex items-center gap-2 text-xs">
+      <div className="px-4 py-2 border-b border-[#f2f2f2] dark:border-[#2b2c2e] flex items-center gap-2 text-xs">
         <input
           type="text"
           value={draft.subject}
           onChange={e => updateDraft({ subject: e.target.value })}
           placeholder="Subject"
-          className="w-full bg-transparent font-bold text-slate-900 dark:text-white outline-none placeholder-slate-400 text-sm"
+          className="w-full bg-transparent text-[#1f1f1f] dark:text-white outline-none placeholder-[#747775] text-xs font-normal"
         />
       </div>
 
-      {/* Rich Formatting Toolbar */}
-      <div className="px-4 py-1.5 border-b border-black/5 dark:border-white/5 flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 bg-slate-50/50 dark:bg-white/2 overflow-x-auto scrollbar-none">
-        <button
-          onClick={() => formatText('bold')}
-          className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded transition-colors cursor-pointer"
-          title="Bold (Cmd+B)"
-        >
-          <Bold className="w-3.5 h-3.5" />
-        </button>
-        <button
-          onClick={() => formatText('italic')}
-          className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded transition-colors cursor-pointer"
-          title="Italic (Cmd+I)"
-        >
-          <Italic className="w-3.5 h-3.5" />
-        </button>
-        <button
-          onClick={() => formatText('underline')}
-          className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded transition-colors cursor-pointer"
-          title="Underline (Cmd+U)"
-        >
-          <Underline className="w-3.5 h-3.5" />
-        </button>
-
-        <div className="h-4 w-[1px] bg-black/10 dark:bg-white/10 mx-1" />
-
-        <button
-          onClick={() => formatText('insertUnorderedList')}
-          className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded transition-colors cursor-pointer"
-          title="Bulleted List"
-        >
-          <List className="w-3.5 h-3.5" />
-        </button>
-        <button
-          onClick={() => formatText('insertOrderedList')}
-          className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded transition-colors cursor-pointer"
-          title="Numbered List"
-        >
-          <ListOrdered className="w-3.5 h-3.5" />
-        </button>
-        <button
-          onClick={() => formatText('formatBlock', 'blockquote')}
-          className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded transition-colors cursor-pointer"
-          title="Quote"
-        >
-          <Quote className="w-3.5 h-3.5" />
-        </button>
-        <button
-          onClick={() => formatText('formatBlock', 'pre')}
-          className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded transition-colors cursor-pointer"
-          title="Code Block"
-        >
-          <Code className="w-3.5 h-3.5" />
-        </button>
-
-        <div className="h-4 w-[1px] bg-black/10 dark:bg-white/10 mx-1" />
-
-        <button
-          onClick={() => {
-            const url = prompt('Enter hyperlink URL:');
-            if (url) formatText('createLink', url);
-          }}
-          className="p-1 hover:bg-black/5 dark:hover:bg-white/10 rounded transition-colors cursor-pointer"
-          title="Insert Link"
-        >
-          <Link2 className="w-3.5 h-3.5" />
-        </button>
-      </div>
-
       {/* Editor Body */}
-      <div className="flex-1 p-4 overflow-y-auto outline-none text-xs leading-relaxed text-slate-800 dark:text-slate-100 scrollbar-thin">
+      <div className="flex-1 p-4 overflow-y-auto outline-none text-xs leading-relaxed text-[#1f1f1f] dark:text-[#e3e3e3] scrollbar-thin font-sans">
         <div
           ref={editorRef}
           contentEditable
@@ -449,23 +371,22 @@ export const ComposeModal: React.FC = () => {
             }
           }}
           className="w-full h-full min-h-[160px] outline-none"
-          data-placeholder="Write your email here..."
         />
       </div>
 
-      {/* Attachment Previews */}
+      {/* Attachments Section */}
       {draft.attachments.length > 0 && (
-        <div className="px-4 py-2 border-t border-black/5 dark:border-white/5 flex items-center gap-2 flex-wrap bg-slate-50/50 dark:bg-white/2">
+        <div className="px-4 py-2 border-t border-[#f2f2f2] dark:border-[#2b2c2e] flex items-center gap-2 flex-wrap bg-[#f6f8fc] dark:bg-[#1e1f20]">
           {draft.attachments.map(att => (
             <span
               key={att.id}
-              className="inline-flex items-center gap-2 px-2.5 py-1 bg-white dark:bg-[#20232e] border border-black/8 dark:border-white/8 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-200 shadow-2xs"
+              className="inline-flex items-center gap-2 px-3 py-1 bg-white dark:bg-[#282a2c] border border-[#e0e3e7] dark:border-[#444746] rounded-lg text-xs text-[#1f1f1f] dark:text-[#e3e3e3]"
             >
-              <File className="w-3.5 h-3.5 text-blue-500" />
+              <File className="w-3.5 h-3.5 text-[#0b57d0]" />
               <span className="truncate max-w-[140px]">{att.filename}</span>
               <button
                 onClick={() => removeAttachment(att.id)}
-                className="hover:text-rose-500 cursor-pointer"
+                className="hover:text-[#ea4335] cursor-pointer"
               >
                 <X className="w-3 h-3" />
               </button>
@@ -474,46 +395,75 @@ export const ComposeModal: React.FC = () => {
         </div>
       )}
 
-      {/* Bottom Footer Actions */}
-      <div className="px-4 py-3 border-t border-black/8 dark:border-white/8 bg-[#fbfbfd] dark:bg-[#1e2029] flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2">
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            onChange={handleFileAttachment}
-            className="hidden"
-          />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="p-2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-black/5 dark:hover:bg-white/10 rounded-xl transition-colors cursor-pointer"
-            title="Attach Files"
-          >
-            <Paperclip className="w-4 h-4" />
-          </button>
-          <button
-            onClick={closeCompose}
-            className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer"
-            title="Discard Draft"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] text-slate-400 font-mono hidden sm:inline">
-            ⌘ + Enter to send
-          </span>
-
+      {/* Gmail Bottom Action Toolbar */}
+      <div className="px-4 py-2.5 border-t border-[#e0e3e7] dark:border-[#333538] flex items-center justify-between shrink-0 bg-white dark:bg-[#1e1f20]">
+        <div className="flex items-center gap-3">
+          {/* Blue Gmail Send Pill Button */}
           <button
             onClick={handleSend}
             disabled={isSending}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold text-xs rounded-xl shadow-md shadow-blue-500/20 transition-all cursor-pointer"
+            className="flex items-center gap-2 px-6 py-2 bg-[#0b57d0] hover:bg-[#0842a0] dark:bg-[#a8c7fa] dark:hover:bg-[#c2e7ff] text-white dark:text-[#001d35] font-semibold text-xs rounded-full shadow-xs transition-colors cursor-pointer"
           >
-            <Send className="w-3.5 h-3.5" />
-            <span>{isSending ? 'Sending...' : 'Send Message'}</span>
+            <span>{isSending ? 'Sending...' : 'Send'}</span>
           </button>
+
+          {/* Formatting tools */}
+          <div className="flex items-center gap-1 text-[#444746] dark:text-[#c4c7c5]">
+            <button
+              onClick={() => formatText('bold')}
+              className="p-1.5 hover:bg-[#f2f2f2] dark:hover:bg-[#28292a] rounded cursor-pointer"
+              title="Bold"
+            >
+              <Bold className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => formatText('italic')}
+              className="p-1.5 hover:bg-[#f2f2f2] dark:hover:bg-[#28292a] rounded cursor-pointer"
+              title="Italic"
+            >
+              <Italic className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => formatText('underline')}
+              className="p-1.5 hover:bg-[#f2f2f2] dark:hover:bg-[#28292a] rounded cursor-pointer"
+              title="Underline"
+            >
+              <Underline className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => {
+                const url = prompt('Enter URL:');
+                if (url) formatText('createLink', url);
+              }}
+              className="p-1.5 hover:bg-[#f2f2f2] dark:hover:bg-[#28292a] rounded cursor-pointer"
+              title="Insert link"
+            >
+              <Link2 className="w-4 h-4" />
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              onChange={handleFileAttachment}
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="p-1.5 hover:bg-[#f2f2f2] dark:hover:bg-[#28292a] rounded cursor-pointer"
+              title="Attach files"
+            >
+              <Paperclip className="w-4 h-4" />
+            </button>
+          </div>
         </div>
+
+        <button
+          onClick={closeCompose}
+          className="p-1.5 text-[#444746] hover:text-[#ea4335] hover:bg-[#fce8e6] dark:hover:bg-[#3b2020] rounded-full transition-colors cursor-pointer"
+          title="Discard draft"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
       </div>
     </div>
   );

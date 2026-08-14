@@ -10,7 +10,8 @@
     padding: 0;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    font-family: "Google Sans", -apple-system, BlinkMacSystemFont, "Roboto", "Segoe UI", sans-serif;
+    letter-spacing: normal;
   }
 }
 
@@ -24,10 +25,45 @@
   -webkit-app-region: no-drag;
 }
 
-/* Custom Scrollbars */
+/* Gmail Surface Styling (Material 3) */
+.gmail-bg-light {
+  background-color: #f6f8fc;
+}
+
+.gmail-bg-dark {
+  background-color: #1e1f20;
+}
+
+.gmail-surface-light {
+  background-color: #ffffff;
+}
+
+.gmail-surface-dark {
+  background-color: #131314;
+}
+
+.gmail-pill-active-light {
+  background-color: #d3e3fd;
+  color: #041e49;
+}
+
+.gmail-pill-active-dark {
+  background-color: #004a77;
+  color: #c2e7ff;
+}
+
+.gmail-search-light {
+  background-color: #eaf1fb;
+}
+
+.gmail-search-dark {
+  background-color: #282a2c;
+}
+
+/* Custom Minimalist Scrollbars */
 .scrollbar-thin::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-track {
@@ -35,20 +71,20 @@
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.12);
+  background: rgba(0, 0, 0, 0.15);
   border-radius: 9999px;
 }
 
 .dark .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.3);
 }
 
 .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.35);
 }
 
 .scrollbar-none::-webkit-scrollbar {
@@ -62,6 +98,6 @@
 /* ContentEditable Placeholder */
 [contenteditable]:empty:before {
   content: attr(data-placeholder);
-  color: #94a3b8;
+  color: #747775;
   cursor: text;
 }
