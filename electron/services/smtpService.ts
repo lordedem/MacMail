@@ -1,0 +1,49 @@
+import nodemailer from 'nodemailer';
+
+export interface SmtpSendParams {
+  host: string;
+  port: number;
+  secure: boolean;
+  user: string;
+  pass: string;
+  from: string;
+  to: string[];
+  cc?: string[];
+  bcc?: string[];
+  subject: string;
+  text?: string;
+  html?: string;
+  attachments?: { filename: string; content?: any; path?: string }[];
+}
+
+export const smtpService = {
+  async sendEmail(params: SmtpSendParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
+    const transporter = nodemailer.createTransport({
+      host: params.host,
+      port: params.port,
+      secure: params.secure,
+      auth: {
+        user: params.user,
+        pass: params.pass,
+      },
+    });
+
+    try {
+      const info = await transporter.sendMail({
+        from: params.from,
+        to: params.to.join(', '),
+        cc: params.cc && params.cc.length > 0 ? params.cc.join(', ') : undefined,
+        bcc: params.bcc && params.bcc.length > 0 ? params.bcc.join(', ') : undefined,
+        subject: params.subject,
+        text: params.text,
+        html: params.html,
+        attachments: params.attachments,
+      });
+
+      return { success: true, messageId: info.messageId };
+    } catch (err: any) {
+      console.error('SMTP send error:', err);
+      return { success: false, error: err.message || 'Failed to send email via SMTP.' };
+    }
+  },
+};
