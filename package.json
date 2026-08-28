@@ -7,7 +7,12 @@
     "dev": "vite",
     "build": "tsc && vite build && tsc -p tsconfig.electron.json",
     "preview": "vite preview",
-    "start": "electron ."
+    "start": "electron .",
+    "dist": "npm run build && electron-builder --mac dmg",
+    "dist:all": "npm run build && electron-builder --mac",
+    "dist:universal": "npm run build && electron-builder --mac dmg --universal",
+    "dist:arm64": "npm run build && electron-builder --mac dmg --arm64",
+    "dist:x64": "npm run build && electron-builder --mac dmg --x64"
   },
   "dependencies": {
     "date-fns": "^4.1.0",
@@ -32,6 +37,7 @@
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "electron": "^44.0.0",
+    "electron-builder": "^26.15.3",
     "postcss": "^8.5.2",
     "tailwindcss": "^4.0.6",
     "tsx": "^4.23.12",
@@ -39,5 +45,53 @@
     "vite": "^6.1.0",
     "vite-plugin-electron": "^0.29.0",
     "vite-plugin-electron-renderer": "^0.14.6"
+  },
+  "build": {
+    "appId": "com.macmail.app",
+    "productName": "MacMail",
+    "copyright": "Copyright © 2026 MacMail",
+    "asar": true,
+    "directories": {
+      "output": "dist-release",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "icon": "build/icon.icns",
+      "category": "public.app-category.productivity",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "darkModeSupport": true,
+      "identity": null,
+      "gatekeeperAssess": false,
+      "hardenedRuntime": false
+    },
+    "dmg": {
+      "title": "MacMail ${version}",
+      "icon": "build/icon.icns",
+      "contents": [
+        {
+          "x": 130,
+          "y": 220,
+          "type": "file"
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ],
+      "window": {
+        "width": 540,
+        "height": 380
+      }
+    }
   }
 }

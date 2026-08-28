@@ -77,18 +77,11 @@ export const HeaderBar: React.FC = () => {
   return (
     <header className="h-12 w-full flex items-center bg-white dark:bg-[#121316] border-b border-[#e5e7eb] dark:border-[#24262b] select-none shrink-0 transition-colors z-20">
       {/* 1. Left Brand / Window Controls (Width matching Sidebar) */}
-      <div className="w-56 md:w-60 h-full flex items-center px-4 gap-3 border-r border-[#e5e7eb] dark:border-[#24262b] shrink-0 app-drag-region">
-        {/* macOS Traffic Lights */}
-        <div className="flex items-center gap-2 no-drag">
-          <div className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e] cursor-pointer hover:opacity-80 transition-opacity" />
-          <div className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123] cursor-pointer hover:opacity-80 transition-opacity" />
-          <div className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29] cursor-pointer hover:opacity-80 transition-opacity" />
-        </div>
-
+      <div className="w-56 md:w-60 h-full flex items-center pl-20 pr-4 gap-2 border-r border-[#e5e7eb] dark:border-[#24262b] shrink-0 app-drag-region">
         {/* Brand Name */}
-        <div className="flex items-center gap-1.5 ml-1">
-          <span className="text-[13.5px] font-bold tracking-tight text-[#1e293b] dark:text-[#f1f5f9]">
-            AllMail
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="text-[13.5px] font-bold tracking-tight text-[#1e293b] dark:text-[#f1f5f9] truncate">
+            MacMail
           </span>
         </div>
       </div>
