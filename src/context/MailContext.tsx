@@ -580,21 +580,23 @@ export const MailProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setMessages(prev => [newSentMessage, ...prev]);
     closeCompose();
 
-    showToast({
-      type: 'success',
-      title: 'Message sent',
-      message: `Sent from ${senderAccount.name} (${senderAccount.email})`,
-    });
-
-    // Invoke API bridge to send via SMTP if configured
-    apiBridge.sendEmail({
+    // Invoke API bridge to send via SMTP with real credentials
+    const sendResult = await apiBridge.sendEmail({
       ...draft,
       from: senderAccount.email,
       smtpConfig: senderAccount.smtpConfig,
       account: senderAccount,
     });
 
-    return true;
+    if (!sendResult.success) {
+      showToast({
+        type: 'error',
+        title: 'Failed to send message',
+        message: sendResult.error || 'SMTP server rejected the email transmission.',
+      });
+    }
+
+    return sendResult.success ?? true;
   }, [composeState, accounts, closeCompose, showToast]);
 
   // Account Management

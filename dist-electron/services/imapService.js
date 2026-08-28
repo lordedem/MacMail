@@ -23,13 +23,17 @@ exports.imapService = {
         }
         catch (err) {
             console.error('IMAP testConnection error:', err);
+            const errorDetail = err.responseText ||
+                err.response ||
+                (err.authenticationFailed ? 'Authentication failed: Invalid username or password.' : err.message) ||
+                'Failed to connect to IMAP server.';
             return {
                 success: false,
-                error: err.message || 'Failed to authenticate with IMAP server.',
+                error: errorDetail,
             };
         }
     },
-    async fetchRecentMessages(account, mailbox = 'INBOX', limit = 30) {
+    async fetchRecentMessages(account, mailbox = 'INBOX', limit = 50) {
         if (!account.imapConfig || !account.imapConfig.host) {
             return { success: false, messages: [], error: 'No IMAP configuration provided.' };
         }
@@ -146,10 +150,14 @@ exports.imapService = {
         }
         catch (err) {
             console.error('IMAP sync error:', err);
+            const errorDetail = err.responseText ||
+                err.response ||
+                (err.authenticationFailed ? 'Authentication failed: Invalid credentials.' : err.message) ||
+                'Failed to sync with IMAP server.';
             return {
                 success: false,
                 messages: [],
-                error: err.message || 'Failed to sync with IMAP server.',
+                error: errorDetail,
             };
         }
     },

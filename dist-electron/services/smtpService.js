@@ -35,7 +35,10 @@ exports.smtpService = {
         }
         catch (err) {
             console.error('SMTP send error:', err);
-            return { success: false, error: err.message || 'Failed to send email via SMTP.' };
+            const errorMsg = err.response ||
+                err.message ||
+                'Failed to send email via SMTP server.';
+            return { success: false, error: errorMsg };
         }
     },
 };

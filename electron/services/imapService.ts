@@ -37,9 +37,14 @@ export const imapService = {
       return { success: true };
     } catch (err: any) {
       console.error('IMAP testConnection error:', err);
+      const errorDetail =
+        err.responseText ||
+        err.response ||
+        (err.authenticationFailed ? 'Authentication failed: Invalid username or password.' : err.message) ||
+        'Failed to connect to IMAP server.';
       return {
         success: false,
-        error: err.message || 'Failed to authenticate with IMAP server.',
+        error: errorDetail,
       };
     }
   },
@@ -47,7 +52,7 @@ export const imapService = {
   async fetchRecentMessages(
     account: SyncAccountParams,
     mailbox = 'INBOX',
-    limit = 30
+    limit = 50
   ): Promise<{ success: boolean; messages: any[]; error?: string }> {
     if (!account.imapConfig || !account.imapConfig.host) {
       return { success: false, messages: [], error: 'No IMAP configuration provided.' };
@@ -179,10 +184,15 @@ export const imapService = {
       return { success: true, messages };
     } catch (err: any) {
       console.error('IMAP sync error:', err);
+      const errorDetail =
+        err.responseText ||
+        err.response ||
+        (err.authenticationFailed ? 'Authentication failed: Invalid credentials.' : err.message) ||
+        'Failed to sync with IMAP server.';
       return {
         success: false,
         messages: [],
-        error: err.message || 'Failed to sync with IMAP server.',
+        error: errorDetail,
       };
     }
   },
