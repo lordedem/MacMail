@@ -49,42 +49,42 @@ export const CommandPalette: React.FC = () => {
       id: 'act_compose',
       title: 'Compose new message',
       shortcut: 'c',
-      icon: <Pencil className="w-4 h-4 text-[#0b57d0]" />,
+      icon: <Pencil className="w-4 h-4 text-[#2563eb]" />,
       run: () => openCompose('new'),
     },
     {
       id: 'act_all_inboxes',
       title: 'Go to All inboxes',
       shortcut: '',
-      icon: <Inbox className="w-4 h-4 text-[#0b57d0]" />,
+      icon: <Inbox className="w-4 h-4 text-[#2563eb]" />,
       run: () => setNavigation({ scope: 'all', folderType: 'inbox', title: 'All inboxes' }),
     },
     {
       id: 'act_starred',
       title: 'Go to Starred',
       shortcut: '',
-      icon: <Star className="w-4 h-4 text-[#fbbc04] fill-current" />,
+      icon: <Star className="w-4 h-4 text-[#f59e0b] fill-current" />,
       run: () => setNavigation({ scope: 'all', folderType: 'starred', title: 'Starred' }),
     },
     {
       id: 'act_sync',
       title: 'Sync all accounts',
       shortcut: '⌘R',
-      icon: <RefreshCw className="w-4 h-4 text-[#34a853]" />,
+      icon: <RefreshCw className="w-4 h-4 text-[#10b981]" />,
       run: () => syncAllAccounts(),
     },
     {
       id: 'act_add_account',
       title: 'Add another account',
       shortcut: '',
-      icon: <Plus className="w-4 h-4 text-[#0b57d0]" />,
+      icon: <Plus className="w-4 h-4 text-[#2563eb]" />,
       run: () => setIsAddAccountOpen(true),
     },
     {
       id: 'act_toggle_theme',
       title: 'Toggle Dark / Light theme',
       shortcut: '',
-      icon: <Moon className="w-4 h-4 text-[#747775]" />,
+      icon: <Moon className="w-4 h-4 text-[#64748b]" />,
       run: () => {
         const isDark = document.documentElement.classList.contains('dark');
         if (isDark) {
@@ -100,7 +100,7 @@ export const CommandPalette: React.FC = () => {
       id: 'act_settings',
       title: 'Settings',
       shortcut: '',
-      icon: <SettingsIcon className="w-4 h-4 text-[#747775]" />,
+      icon: <SettingsIcon className="w-4 h-4 text-[#64748b]" />,
       run: () => setIsSettingsOpen(true),
     },
   ];
@@ -147,11 +147,11 @@ export const CommandPalette: React.FC = () => {
     >
       <div
         onClick={e => e.stopPropagation()}
-        className="w-full max-w-xl bg-white dark:bg-[#1e1f20] border border-[#e0e3e7] dark:border-[#333538] rounded-3xl shadow-2xl overflow-hidden font-sans flex flex-col"
+        className="w-full max-w-xl bg-white dark:bg-[#16181d] border border-[#e2e8f0] dark:border-[#24262c] rounded-2xl shadow-2xl overflow-hidden font-sans flex flex-col"
       >
-        {/* Google Search input bar */}
-        <div className="flex items-center px-5 py-4 border-b border-[#f2f2f2] dark:border-[#2b2c2e] gap-3.5 bg-[#f6f8fc] dark:bg-[#282a2c]">
-          <Search className="w-5 h-5 text-[#0b57d0] dark:text-[#a8c7fa] shrink-0" />
+        {/* Search input bar */}
+        <div className="flex items-center px-5 py-3.5 border-b border-[#f1f5f9] dark:border-[#1e2026] gap-3 bg-[#f8fafc] dark:bg-[#1a1c22]">
+          <Search className="w-4 h-4 text-[#2563eb] shrink-0" />
           <input
             ref={inputRef}
             type="text"
@@ -162,9 +162,9 @@ export const CommandPalette: React.FC = () => {
             }}
             onKeyDown={handleKeyDown}
             placeholder="Search all inboxes or jump to..."
-            className="w-full bg-transparent text-sm text-[#1f1f1f] dark:text-[#e3e3e3] placeholder-[#747775] outline-none font-medium"
+            className="w-full bg-transparent text-[13px] text-[#0f172a] dark:text-[#f8fafc] placeholder-[#94a3b8] outline-none font-medium"
           />
-          <kbd className="text-[10px] text-[#747775] bg-white dark:bg-[#1e1f20] border border-[#e0e3e7] dark:border-[#444746] px-2 py-0.5 rounded font-mono">
+          <kbd className="text-[10px] text-[#64748b] bg-white dark:bg-[#121316] border border-[#e2e8f0] dark:border-[#2e323b] px-1.5 py-0.5 rounded font-mono">
             ESC
           </kbd>
         </div>
@@ -173,7 +173,7 @@ export const CommandPalette: React.FC = () => {
         <div className="max-h-80 overflow-y-auto p-2 space-y-1 scrollbar-thin">
           {matchedActions.length > 0 && (
             <div>
-              <div className="px-3 py-1 text-[10px] font-bold text-[#747775] uppercase tracking-wider">
+              <div className="px-3 py-1 text-[10px] font-bold text-[#94a3b8] dark:text-[#64748b] uppercase tracking-wider">
                 Commands
               </div>
               {matchedActions.map((action, idx) => {
@@ -186,25 +186,19 @@ export const CommandPalette: React.FC = () => {
                       setIsCommandPaletteOpen(false);
                     }}
                     onMouseEnter={() => setSelectedIndex(idx)}
-                    className={`flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-medium cursor-pointer transition-colors ${
+                    className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium cursor-pointer transition-colors ${
                       isSelected
-                        ? 'bg-[#d3e3fd] text-[#041e49] dark:bg-[#004a77] dark:text-[#c2e7ff] font-bold'
-                        : 'text-[#444746] dark:text-[#c4c7c5] hover:bg-[#f6f8fc] dark:hover:bg-[#28292a]'
+                        ? 'bg-[#dbeafe] text-[#1d4ed8] dark:bg-[#1e293b] dark:text-[#60a5fa] font-bold'
+                        : 'text-[#334155] dark:text-[#cbd5e1] hover:bg-[#f8fafc] dark:hover:bg-[#1e2026]'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5">
                       <div>{action.icon}</div>
                       <span>{action.title}</span>
                     </div>
 
                     {action.shortcut && (
-                      <kbd
-                        className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md ${
-                          isSelected
-                            ? 'bg-white/40 text-[#041e49]'
-                            : 'bg-black/5 dark:bg-white/10 text-[#747775]'
-                        }`}
-                      >
+                      <kbd className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-black/5 dark:bg-white/10 text-[#64748b]">
                         {action.shortcut}
                       </kbd>
                     )}
@@ -215,9 +209,9 @@ export const CommandPalette: React.FC = () => {
           )}
 
           {matchedEmails.length > 0 && (
-            <div className="mt-2 pt-2 border-t border-[#f2f2f2] dark:border-[#2b2c2e]">
-              <div className="px-3 py-1 text-[10px] font-bold text-[#747775] uppercase tracking-wider">
-                Matching Conversations (All Inboxes)
+            <div className="mt-2 pt-2 border-t border-[#f1f5f9] dark:border-[#1e2026]">
+              <div className="px-3 py-1 text-[10px] font-bold text-[#94a3b8] dark:text-[#64748b] uppercase tracking-wider">
+                Matching Conversations
               </div>
               {matchedEmails.map((thread, i) => {
                 const itemIndex = matchedActions.length + i;
@@ -232,21 +226,17 @@ export const CommandPalette: React.FC = () => {
                       setIsCommandPaletteOpen(false);
                     }}
                     onMouseEnter={() => setSelectedIndex(itemIndex)}
-                    className={`flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs cursor-pointer transition-colors ${
+                    className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs cursor-pointer transition-colors ${
                       isSelected
-                        ? 'bg-[#d3e3fd] text-[#041e49] dark:bg-[#004a77] dark:text-[#c2e7ff] font-bold'
-                        : 'text-[#444746] dark:text-[#c4c7c5] hover:bg-[#f6f8fc] dark:hover:bg-[#28292a]'
+                        ? 'bg-[#dbeafe] text-[#1d4ed8] dark:bg-[#1e293b] dark:text-[#60a5fa] font-bold'
+                        : 'text-[#334155] dark:text-[#cbd5e1] hover:bg-[#f8fafc] dark:hover:bg-[#1e2026]'
                     }`}
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <Mail className="w-4 h-4 shrink-0 text-[#0b57d0]" />
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <Mail className="w-4 h-4 shrink-0 text-[#2563eb]" />
                       <div className="min-w-0">
                         <p className="font-semibold truncate text-xs">{thread.subject}</p>
-                        <p
-                          className={`text-[11px] truncate ${
-                            isSelected ? 'text-[#041e49]' : 'text-[#747775]'
-                          }`}
-                        >
+                        <p className="text-[11px] truncate text-[#64748b] dark:text-[#94a3b8]">
                           {thread.snippet}
                         </p>
                       </div>
@@ -263,7 +253,7 @@ export const CommandPalette: React.FC = () => {
           )}
 
           {totalItems === 0 && (
-            <div className="py-8 text-center text-xs text-[#747775]">
+            <div className="py-8 text-center text-xs text-[#94a3b8]">
               No matching commands or emails found.
             </div>
           )}

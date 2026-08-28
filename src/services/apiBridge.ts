@@ -4,7 +4,7 @@ declare global {
   interface Window {
     electronAPI?: {
       testAccountConnection: (account: Partial<Account>) => Promise<{ success: boolean; error?: string }>;
-      syncAccount: (accountId: string) => Promise<{ success: boolean; newMessages?: EmailMessage[] }>;
+      syncAccount: (account: Account) => Promise<{ success: boolean; newMessages?: EmailMessage[]; error?: string }>;
       sendEmail: (draft: any) => Promise<{ success: boolean; error?: string; messageId?: string }>;
       showNotification: (title: string, body: string) => void;
       setBadgeCount: (count: number) => void;
@@ -26,19 +26,19 @@ export const apiBridge = {
       return window.electronAPI.testAccountConnection(account);
     }
     // Web / Simulated response
-    await new Promise(r => setTimeout(r, 900));
-    if (account.email && (account.email.includes('@') || account.provider === 'demo')) {
+    await new Promise(r => setTimeout(r, 600));
+    if (account.email && account.email.includes('@')) {
       return { success: true };
     }
     return { success: false, error: 'Invalid server configuration or authentication failed.' };
   },
 
-  async syncAccount(accountId: string): Promise<{ success: boolean; newMessages?: EmailMessage[] }> {
+  async syncAccount(account: Account): Promise<{ success: boolean; newMessages?: EmailMessage[]; error?: string }> {
     if (window.electronAPI?.syncAccount) {
-      return window.electronAPI.syncAccount(accountId);
+      return window.electronAPI.syncAccount(account);
     }
-    await new Promise(r => setTimeout(r, 600));
-    return { success: true };
+    await new Promise(r => setTimeout(r, 400));
+    return { success: true, newMessages: [] };
   },
 
   async sendEmail(draft: any): Promise<{ success: boolean; error?: string; messageId?: string }> {

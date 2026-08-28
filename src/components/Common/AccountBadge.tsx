@@ -10,35 +10,33 @@ interface AccountBadgeProps {
 
 export const AccountBadge: React.FC<AccountBadgeProps> = ({
   account,
-  size = 'sm',
+  size = 'xs',
   showName = true,
   className = '',
 }) => {
   if (!account) return null;
 
   const sizeClasses = {
-    xs: 'text-[10px] px-1.5 py-0.5 gap-1',
-    sm: 'text-xs px-2 py-0.5 gap-1.5',
-    md: 'text-sm px-2.5 py-1 gap-2',
+    xs: 'text-[11px] px-2 py-0.5 gap-1.5',
+    sm: 'text-xs px-2.5 py-0.5 gap-1.5',
+    md: 'text-xs px-3 py-1 gap-2',
   }[size];
 
-  // Clean account display name (e.g. "Work", "Personal", "Rivers Advisory")
-  const displayName = account.name.replace(/Alex Rivers\s*\((.*?)\)/i, '$1').replace(/\(.*?\)/g, (match) => match.replace(/[()]/g, ''));
+  // Clean account display name (e.g. "Work", "Gmail", "iCloud")
+  const displayName = account.name
+    .replace(/Edem\s*\((.*?)\)/i, '$1')
+    .replace(/Alex Rivers\s*\((.*?)\)/i, '$1')
+    .replace(/\(.*?\)/g, match => match.replace(/[()]/g, ''));
 
   return (
     <span
-      className={`inline-flex items-center rounded-md font-medium tracking-tight border select-none transition-colors ${sizeClasses} ${className}`}
-      style={{
-        backgroundColor: `${account.color}15`,
-        borderColor: `${account.color}35`,
-        color: account.color,
-      }}
+      className={`inline-flex items-center rounded-full font-medium tracking-tight bg-white dark:bg-[#202124] border border-[#e2e8f0] dark:border-[#383a40] text-[#334155] dark:text-[#cbd5e1] select-none transition-colors shadow-2xs shrink-0 ${sizeClasses} ${className}`}
     >
       <span
-        className="w-1.5 h-1.5 rounded-full shrink-0 animate-pulse"
+        className="w-2 h-2 rounded-full shrink-0"
         style={{ backgroundColor: account.color }}
       />
-      {showName && <span className="truncate max-w-[120px]">{displayName}</span>}
+      {showName && <span className="truncate">{displayName}</span>}
     </span>
   );
 };

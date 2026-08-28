@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import { useMail } from '../../context/MailContext';
-import { Account, AccountProvider } from '../../types/mail';
+import { AccountProvider } from '../../types/mail';
 import { apiBridge } from '../../services/apiBridge';
 import {
   X,
   Mail,
-  Lock,
-  User,
   CheckCircle2,
   AlertCircle,
-  Sparkles,
+  Server,
 } from 'lucide-react';
 
 const PROVIDER_PRESETS: {
@@ -22,27 +20,27 @@ const PROVIDER_PRESETS: {
 }[] = [
   {
     id: 'gmail',
-    name: 'Google',
+    name: 'Gmail',
     imapHost: 'imap.gmail.com',
     imapPort: 993,
     smtpHost: 'smtp.gmail.com',
     smtpPort: 465,
   },
   {
+    id: 'custom',
+    name: 'Self-Hosted / Custom IMAP',
+    imapHost: '',
+    imapPort: 993,
+    smtpHost: '',
+    smtpPort: 587,
+  },
+  {
     id: 'outlook',
-    name: 'Outlook, Hotmail, Live',
+    name: 'Outlook / Office 365',
     imapHost: 'outlook.office365.com',
     imapPort: 993,
     smtpHost: 'smtp.office365.com',
     smtpPort: 587,
-  },
-  {
-    id: 'yahoo',
-    name: 'Yahoo',
-    imapHost: 'imap.mail.yahoo.com',
-    imapPort: 993,
-    smtpHost: 'smtp.mail.yahoo.com',
-    smtpPort: 465,
   },
   {
     id: 'icloud',
@@ -53,22 +51,30 @@ const PROVIDER_PRESETS: {
     smtpPort: 587,
   },
   {
-    id: 'custom',
-    name: 'Other (IMAP)',
-    imapHost: '',
+    id: 'fastmail',
+    name: 'Fastmail',
+    imapHost: 'imap.fastmail.com',
     imapPort: 993,
-    smtpHost: '',
-    smtpPort: 587,
+    smtpHost: 'smtp.fastmail.com',
+    smtpPort: 465,
+  },
+  {
+    id: 'yahoo',
+    name: 'Yahoo',
+    imapHost: 'imap.mail.yahoo.com',
+    imapPort: 993,
+    smtpHost: 'smtp.mail.yahoo.com',
+    smtpPort: 465,
   },
 ];
 
 const COLOR_OPTIONS = [
-  '#0b57d0', // Google Blue
-  '#34a853', // Google Green
-  '#ea4335', // Google Red
+  '#2563eb', // Blue
+  '#ef4444', // Red
+  '#10b981', // Emerald
   '#7c3aed', // Purple
-  '#fbbc04', // Google Yellow
-  '#0891b2', // Cyan
+  '#f59e0b', // Amber
+  '#64748b', // Slate
 ];
 
 export const AddAccountModal: React.FC = () => {
@@ -100,6 +106,9 @@ export const AddAccountModal: React.FC = () => {
       setSmtpHost(preset.smtpHost);
       setSmtpPort(preset.smtpPort);
     }
+    if (p === 'custom') {
+      setShowAdvanced(true);
+    }
   };
 
   const handleTestConnection = async () => {
@@ -114,7 +123,13 @@ export const AddAccountModal: React.FC = () => {
     const result = await apiBridge.testAccountConnection({
       email,
       provider,
-      imapConfig: { host: imapHost, port: imapPort, secure: true, user: email, pass: password },
+      imapConfig: {
+        host: imapHost || (email.includes('@') ? `imap.${email.split('@')[1]}` : 'imap.gmail.com'),
+        port: imapPort,
+        secure: true,
+        user: email,
+        pass: password,
+      },
     });
 
     setIsTesting(false);
@@ -132,6 +147,9 @@ export const AddAccountModal: React.FC = () => {
       return;
     }
 
+    const finalImapHost = imapHost || `imap.${email.split('@')[1]}`;
+    const finalSmtpHost = smtpHost || `smtp.${email.split('@')[1]}`;
+
     addAccount({
       name: name.trim(),
       email: email.trim(),
@@ -141,16 +159,16 @@ export const AddAccountModal: React.FC = () => {
       isEnabled: true,
       signature: `Best regards,\n${name.trim()}\n${email.trim()}`,
       imapConfig: {
-        host: imapHost,
+        host: finalImapHost,
         port: imapPort,
         secure: true,
         user: email.trim(),
         pass: password,
       },
       smtpConfig: {
-        host: smtpHost,
+        host: finalSmtpHost,
         port: smtpPort,
-        secure: true,
+        secure: smtpPort === 465,
         user: email.trim(),
         pass: password,
       },
@@ -163,48 +181,28 @@ export const AddAccountModal: React.FC = () => {
     setTestResult(null);
   };
 
-  const addQuickDemoAccount = () => {
-    const demoAccounts = [
-      { name: 'Alex Rivers (Startups)', email: 'alex@startup-ventures.co', color: '#34a853' },
-      { name: 'Alex Rivers (Work Google)', email: 'alex.rivers@workspace.org', color: '#0b57d0' },
-    ];
-    const picked = demoAccounts[Math.floor(Math.random() * demoAccounts.length)];
-
-    addAccount({
-      name: picked.name,
-      email: picked.email,
-      provider: 'demo',
-      color: picked.color,
-      badgeColor: '',
-      isEnabled: true,
-      signature: `—\n${picked.name}`,
-    });
-
-    setIsAddAccountOpen(false);
-  };
-
   return (
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 select-none animate-in fade-in duration-150">
-      <div className="w-full max-w-lg bg-white dark:bg-[#1e1f20] border border-[#e0e3e7] dark:border-[#333538] rounded-3xl shadow-2xl overflow-hidden font-sans">
+      <div className="w-full max-w-lg bg-white dark:bg-[#16181d] border border-[#e2e8f0] dark:border-[#24262c] rounded-3xl shadow-2xl overflow-hidden font-sans">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-[#f2f2f2] dark:border-[#2b2c2e] flex items-center justify-between">
+        <div className="px-6 py-5 border-b border-[#f1f5f9] dark:border-[#1e2026] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#eaf1fb] dark:bg-[#282a2c] flex items-center justify-center text-[#0b57d0] dark:text-[#a8c7fa]">
+            <div className="w-10 h-10 rounded-full bg-[#eff6ff] dark:bg-[#1e293b] flex items-center justify-center text-[#2563eb] dark:text-[#60a5fa]">
               <Mail className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-medium text-[#1f1f1f] dark:text-[#e3e3e3]">
-                Set up email
+              <h3 className="text-base font-bold text-[#0f172a] dark:text-[#f8fafc]">
+                Add Mailbox Account
               </h3>
-              <p className="text-xs text-[#747775]">
-                Add your account to MacMail
+              <p className="text-xs text-[#64748b] dark:text-[#94a3b8]">
+                Connect self-hosted IMAP/SMTP or email provider
               </p>
             </div>
           </div>
 
           <button
             onClick={() => setIsAddAccountOpen(false)}
-            className="p-1.5 text-[#444746] hover:bg-[#f2f2f2] dark:hover:bg-[#28292a] rounded-full cursor-pointer"
+            className="p-1.5 text-[#64748b] hover:bg-[#f1f5f9] dark:hover:bg-[#1e2026] rounded-full cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -213,8 +211,8 @@ export const AddAccountModal: React.FC = () => {
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[75vh] overflow-y-auto scrollbar-thin">
           <div>
-            <label className="block text-xs font-semibold text-[#444746] dark:text-[#c4c7c5] mb-2">
-              Select Email Provider
+            <label className="block text-xs font-semibold text-[#475569] dark:text-[#94a3b8] mb-2">
+              Provider / Server Type
             </label>
             <div className="grid grid-cols-2 gap-2">
               {PROVIDER_PRESETS.map(p => (
@@ -222,10 +220,10 @@ export const AddAccountModal: React.FC = () => {
                   type="button"
                   key={p.id}
                   onClick={() => handleProviderSelect(p.id)}
-                  className={`p-3 rounded-2xl border text-xs font-medium text-left transition-all cursor-pointer ${
+                  className={`p-2.5 rounded-xl border text-xs font-medium text-left transition-all cursor-pointer ${
                     provider === p.id
-                      ? 'border-[#0b57d0] bg-[#eaf1fb] dark:bg-[#004a77]/40 text-[#041e49] dark:text-[#c2e7ff] font-bold'
-                      : 'border-[#e0e3e7] dark:border-[#333538] text-[#444746] dark:text-[#c4c7c5] hover:bg-[#f6f8fc] dark:hover:bg-[#28292a]'
+                      ? 'border-[#2563eb] bg-[#eff6ff] dark:bg-[#1e293b] text-[#1d4ed8] dark:text-[#60a5fa] font-bold'
+                      : 'border-[#e2e8f0] dark:border-[#2e323b] text-[#334155] dark:text-[#cbd5e1] hover:bg-[#f8fafc] dark:hover:bg-[#1e2026]'
                   }`}
                 >
                   {p.name}
@@ -235,24 +233,24 @@ export const AddAccountModal: React.FC = () => {
           </div>
 
           {/* Account Details */}
-          <div className="space-y-3 pt-2">
+          <div className="space-y-3 pt-1">
             <div>
-              <label className="block text-xs font-medium text-[#444746] dark:text-[#c4c7c5] mb-1">
-                Your name
+              <label className="block text-xs font-medium text-[#475569] dark:text-[#94a3b8] mb-1">
+                Account Name
               </label>
               <input
                 type="text"
                 required
                 value={name}
                 onChange={e => setName(e.target.value)}
-                placeholder="Alex Rivers"
-                className="w-full px-3.5 py-2.5 bg-white dark:bg-[#282a2c] border border-[#747775]/40 focus:border-[#0b57d0] rounded-xl text-xs text-[#1f1f1f] dark:text-[#e3e3e3] outline-none"
+                placeholder="Personal, Work, Server Mail..."
+                className="w-full px-3.5 py-2.5 bg-white dark:bg-[#121316] border border-[#cbd5e1] dark:border-[#334155] focus:border-[#2563eb] rounded-xl text-xs text-[#0f172a] dark:text-[#f8fafc] outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-[#444746] dark:text-[#c4c7c5] mb-1">
-                Email address
+              <label className="block text-xs font-medium text-[#475569] dark:text-[#94a3b8] mb-1">
+                Email Address
               </label>
               <input
                 type="email"
@@ -260,27 +258,87 @@ export const AddAccountModal: React.FC = () => {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="name@domain.com"
-                className="w-full px-3.5 py-2.5 bg-white dark:bg-[#282a2c] border border-[#747775]/40 focus:border-[#0b57d0] rounded-xl text-xs text-[#1f1f1f] dark:text-[#e3e3e3] outline-none"
+                className="w-full px-3.5 py-2.5 bg-white dark:bg-[#121316] border border-[#cbd5e1] dark:border-[#334155] focus:border-[#2563eb] rounded-xl text-xs text-[#0f172a] dark:text-[#f8fafc] outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-[#444746] dark:text-[#c4c7c5] mb-1">
-                Password or App Password
+              <label className="block text-xs font-medium text-[#475569] dark:text-[#94a3b8] mb-1">
+                Password / App Password
               </label>
               <input
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="••••••••••••••••"
-                className="w-full px-3.5 py-2.5 bg-white dark:bg-[#282a2c] border border-[#747775]/40 focus:border-[#0b57d0] rounded-xl text-xs text-[#1f1f1f] dark:text-[#e3e3e3] outline-none"
+                className="w-full px-3.5 py-2.5 bg-white dark:bg-[#121316] border border-[#cbd5e1] dark:border-[#334155] focus:border-[#2563eb] rounded-xl text-xs text-[#0f172a] dark:text-[#f8fafc] outline-none"
               />
+            </div>
+
+            {/* Self-hosted advanced IMAP/SMTP server toggle */}
+            <div>
+              <button
+                type="button"
+                onClick={() => setShowAdvanced(prev => !prev)}
+                className="text-xs text-[#2563eb] dark:text-[#60a5fa] hover:underline font-medium flex items-center gap-1 cursor-pointer"
+              >
+                <Server className="w-3.5 h-3.5" />
+                <span>{showAdvanced ? 'Hide Server Settings' : 'Custom IMAP / SMTP Settings'}</span>
+              </button>
+
+              {showAdvanced && (
+                <div className="mt-2.5 p-3 bg-[#f8fafc] dark:bg-[#121316] border border-[#e2e8f0] dark:border-[#24262c] rounded-xl space-y-2.5 text-xs">
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="col-span-2">
+                      <label className="block text-[11px] text-[#64748b] dark:text-[#94a3b8] mb-1">IMAP Host</label>
+                      <input
+                        type="text"
+                        value={imapHost}
+                        onChange={e => setImapHost(e.target.value)}
+                        placeholder="imap.domain.com"
+                        className="w-full p-2 bg-white dark:bg-[#1c1e24] border border-[#cbd5e1] dark:border-[#334155] rounded-lg text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] text-[#64748b] dark:text-[#94a3b8] mb-1">Port</label>
+                      <input
+                        type="number"
+                        value={imapPort}
+                        onChange={e => setImapPort(Number(e.target.value))}
+                        className="w-full p-2 bg-white dark:bg-[#1c1e24] border border-[#cbd5e1] dark:border-[#334155] rounded-lg text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="col-span-2">
+                      <label className="block text-[11px] text-[#64748b] dark:text-[#94a3b8] mb-1">SMTP Host</label>
+                      <input
+                        type="text"
+                        value={smtpHost}
+                        onChange={e => setSmtpHost(e.target.value)}
+                        placeholder="smtp.domain.com"
+                        className="w-full p-2 bg-white dark:bg-[#1c1e24] border border-[#cbd5e1] dark:border-[#334155] rounded-lg text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] text-[#64748b] dark:text-[#94a3b8] mb-1">Port</label>
+                      <input
+                        type="number"
+                        value={smtpPort}
+                        onChange={e => setSmtpPort(Number(e.target.value))}
+                        className="w-full p-2 bg-white dark:bg-[#1c1e24] border border-[#cbd5e1] dark:border-[#334155] rounded-lg text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Account Color Palette */}
             <div>
-              <label className="block text-xs font-medium text-[#444746] dark:text-[#c4c7c5] mb-1.5">
-                Account Label Color
+              <label className="block text-xs font-medium text-[#475569] dark:text-[#94a3b8] mb-1.5">
+                Badge Color
               </label>
               <div className="flex items-center gap-2.5">
                 {COLOR_OPTIONS.map(c => (
@@ -288,8 +346,8 @@ export const AddAccountModal: React.FC = () => {
                     type="button"
                     key={c}
                     onClick={() => setColor(c)}
-                    className={`w-6 h-6 rounded-full transition-transform cursor-pointer ${
-                      color === c ? 'scale-125 ring-2 ring-[#0b57d0] ring-offset-2 dark:ring-offset-[#1e1f20]' : ''
+                    className={`w-5 h-5 rounded-full transition-transform cursor-pointer ${
+                      color === c ? 'scale-125 ring-2 ring-[#2563eb] ring-offset-2 dark:ring-offset-[#16181d]' : ''
                     }`}
                     style={{ backgroundColor: c }}
                   />
@@ -302,8 +360,8 @@ export const AddAccountModal: React.FC = () => {
               <div
                 className={`p-3 rounded-xl flex items-center gap-2 text-xs ${
                   testResult.success
-                    ? 'bg-[#e6f4ea] text-[#137333]'
-                    : 'bg-[#fce8e6] text-[#c5221f]'
+                    ? 'bg-[#ecfdf5] text-[#047857]'
+                    : 'bg-[#fef2f2] text-[#b91c1c]'
                 }`}
               >
                 {testResult.success ? (
@@ -317,30 +375,30 @@ export const AddAccountModal: React.FC = () => {
           </div>
 
           {/* Footer Buttons */}
-          <div className="pt-4 border-t border-[#f2f2f2] dark:border-[#2b2c2e] flex items-center justify-between">
+          <div className="pt-4 border-t border-[#f1f5f9] dark:border-[#1e2026] flex items-center justify-between">
             <button
               type="button"
-              onClick={addQuickDemoAccount}
-              className="text-xs font-medium text-[#0b57d0] dark:text-[#a8c7fa] hover:underline cursor-pointer"
+              onClick={handleTestConnection}
+              disabled={isTesting}
+              className="px-4 py-2 text-xs font-medium text-[#2563eb] dark:text-[#60a5fa] hover:bg-[#eff6ff] dark:hover:bg-[#1e293b] rounded-full transition-colors cursor-pointer"
             >
-              Demo Account
+              {isTesting ? 'Testing...' : 'Test Connection'}
             </button>
 
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={handleTestConnection}
-                disabled={isTesting}
-                className="px-4 py-2 text-xs font-medium text-[#0b57d0] dark:text-[#a8c7fa] hover:bg-[#eaf1fb] dark:hover:bg-[#282a2c] rounded-full transition-colors cursor-pointer"
+                onClick={() => setIsAddAccountOpen(false)}
+                className="px-4 py-2 text-xs font-medium text-[#64748b] hover:bg-[#f1f5f9] dark:hover:bg-[#1e2026] rounded-full cursor-pointer"
               >
-                {isTesting ? 'Testing...' : 'Test'}
+                Cancel
               </button>
 
               <button
                 type="submit"
-                className="px-6 py-2 bg-[#0b57d0] hover:bg-[#0842a0] text-white font-medium text-xs rounded-full shadow-xs transition-colors cursor-pointer"
+                className="px-6 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-medium text-xs rounded-full shadow-xs transition-colors cursor-pointer"
               >
-                Done
+                Add Account
               </button>
             </div>
           </div>

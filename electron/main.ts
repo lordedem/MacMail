@@ -146,23 +146,33 @@ ipcMain.handle('mail:test-account', async (_, account) => {
   return { success: true };
 });
 
-ipcMain.handle('mail:sync-account', async (_, accountId) => {
-  return { success: true };
+ipcMain.handle('mail:sync-account', async (_, account) => {
+  if (!account || !account.imapConfig || !account.imapConfig.host) {
+    return { success: true, newMessages: [] };
+  }
+  const result = await imapService.fetchRecentMessages(account, 'INBOX', 50);
+  return {
+    success: result.success,
+    newMessages: result.messages,
+    error: result.error,
+  };
 });
 
 ipcMain.handle('mail:send-email', async (_, draft) => {
-  if (draft.smtpConfig && draft.smtpConfig.host) {
+  const smtpConfig = draft.smtpConfig || (draft.account && draft.account.smtpConfig);
+  if (smtpConfig && smtpConfig.host) {
     return smtpService.sendEmail({
-      host: draft.smtpConfig.host,
-      port: draft.smtpConfig.port,
-      secure: draft.smtpConfig.secure,
-      user: draft.smtpConfig.user,
-      pass: draft.smtpConfig.pass,
+      host: smtpConfig.host,
+      port: smtpConfig.port || 465,
+      secure: smtpConfig.secure ?? (smtpConfig.port === 465),
+      user: smtpConfig.user || draft.from,
+      pass: smtpConfig.pass || '',
       from: draft.from,
       to: draft.to,
       cc: draft.cc,
       bcc: draft.bcc,
       subject: draft.subject,
+      text: draft.bodyText,
       html: draft.bodyHtml,
     });
   }
@@ -170,7 +180,7 @@ ipcMain.handle('mail:send-email', async (_, draft) => {
 });
 
 ipcMain.handle('app:set-badge-count', (_, count: number) => {
-  if (process.platform === 'darwin') {
+  if (process.platform === 'darwin' && app.dock) {
     app.dock.setBadge(count > 0 ? String(count) : '');
   }
 });

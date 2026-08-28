@@ -1,9 +1,9 @@
 import { Account, EmailMessage, EmailThread } from '../types/mail';
 import { INITIAL_ACCOUNTS, INITIAL_MESSAGES } from '../data/mockData';
 
-const ACCOUNTS_STORAGE_KEY = 'macmail_accounts_v1';
-const MESSAGES_STORAGE_KEY = 'macmail_messages_v1';
-const SETTINGS_STORAGE_KEY = 'macmail_settings_v1';
+const ACCOUNTS_STORAGE_KEY = 'macmail_accounts_v3';
+const MESSAGES_STORAGE_KEY = 'macmail_messages_v3';
+const SETTINGS_STORAGE_KEY = 'macmail_settings_v3';
 
 export interface AppSettings {
   theme: 'dark' | 'light' | 'system';
@@ -17,13 +17,13 @@ export interface AppSettings {
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
-  theme: 'system',
+  theme: 'light',
   snippetLines: 2,
   soundEffects: true,
   notifications: true,
   confirmArchive: false,
   confirmDelete: false,
-  defaultAccountId: 'acc_work',
+  defaultAccountId: 'acc_edem_gmail',
   syncIntervalMinutes: 5,
 };
 

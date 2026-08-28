@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useMail } from './context/MailContext';
+import { HeaderBar } from './components/Header/HeaderBar';
 import { Sidebar } from './components/Sidebar/Sidebar';
 import { MessageList } from './components/MessageList/MessageList';
 import { MessageDetail } from './components/MessageDetail/MessageDetail';
@@ -169,17 +170,23 @@ export const App: React.FC = () => {
   ]);
 
   return (
-    <div className="h-screen w-screen flex flex-row overflow-hidden bg-[#f6f6f8] dark:bg-[#131418] text-[#1c1d22] dark:text-[#edeef2] antialiased">
-      {/* Pane 1: Sidebar */}
-      <Sidebar />
+    <div className="h-screen w-screen flex flex-col overflow-hidden bg-[#fafafa] dark:bg-[#121316] text-[#0f172a] dark:text-[#f8fafc] antialiased select-none font-sans">
+      {/* Top Header Bar across all 3 columns */}
+      <HeaderBar />
 
-      {/* Pane 2: Message List */}
-      <MessageList />
+      {/* 3-Column Body */}
+      <div className="flex-1 flex flex-row overflow-hidden min-h-0">
+        {/* Column 1: Sidebar Navigation */}
+        <Sidebar />
 
-      {/* Pane 3: Reading Pane & Details */}
-      <MessageDetail />
+        {/* Column 2: Message List Feed */}
+        <MessageList />
 
-      {/* Floating Modals & Overlays */}
+        {/* Column 3: Message Detail Canvas */}
+        <MessageDetail />
+      </div>
+
+      {/* Modals & Overlays */}
       <ComposeModal />
       <AddAccountModal />
       <SettingsModal />

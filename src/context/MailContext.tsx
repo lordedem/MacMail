@@ -238,7 +238,7 @@ export const MailProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (isSearching && searchResults) {
       // Filter threads that have at least one message matching the search
       result = result.filter(th => {
-        return th.messages.some(m => searchResults.messageIds.has(m.id));
+        return th.messages.some((m: EmailMessage) => searchResults.messageIds.has(m.id));
       });
       return result;
     }
@@ -590,6 +590,8 @@ export const MailProvider: React.FC<{ children: React.ReactNode }> = ({ children
     apiBridge.sendEmail({
       ...draft,
       from: senderAccount.email,
+      smtpConfig: senderAccount.smtpConfig,
+      account: senderAccount,
     });
 
     return true;
@@ -606,10 +608,28 @@ export const MailProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     setAccounts(prev => [...prev, newAccount]);
+
     showToast({
       type: 'success',
       title: 'Account Added',
       message: `Connected ${newAccount.name} (${newAccount.email})`,
+    });
+
+    // Trigger immediate IMAP sync in background
+    apiBridge.syncAccount(newAccount).then(res => {
+      if (res.success && res.newMessages && res.newMessages.length > 0) {
+        setMessages(prev => {
+          const existingIds = new Set(prev.map(m => m.id));
+          const newToAdd = res.newMessages!.filter(m => !existingIds.has(m.id));
+          return [...newToAdd, ...prev];
+        });
+      } else if (!res.success && res.error) {
+        showToast({
+          type: 'warning',
+          title: `IMAP Sync Notice`,
+          message: `${newAccount.name}: ${res.error}`,
+        });
+      }
     });
 
     return newAccount;
@@ -629,23 +649,55 @@ export const MailProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const syncAllAccounts = useCallback(async () => {
     setIsSyncing(true);
     try {
+      let totalNewFetched = 0;
+      const errors: string[] = [];
+
       for (const acc of accounts) {
-        await apiBridge.syncAccount(acc.id);
+        const res = await apiBridge.syncAccount(acc);
+        if (res.success && res.newMessages && res.newMessages.length > 0) {
+          setMessages(prev => {
+            const existingIds = new Set(prev.map(m => m.id));
+            const newToAdd = res.newMessages!.filter(m => !existingIds.has(m.id));
+            totalNewFetched += newToAdd.length;
+            return [...newToAdd, ...prev];
+          });
+        } else if (!res.success && res.error) {
+          errors.push(`${acc.name}: ${res.error}`);
+        }
       }
+
       setAccounts(prev =>
         prev.map(a => ({ ...a, lastSyncTime: new Date().toISOString() }))
       );
-      showToast({
-        type: 'info',
-        title: 'All Inboxes Synced',
-        message: `Checked ${accounts.length} accounts just now`,
-      });
-    } catch (e) {
-      showToast({ type: 'error', title: 'Sync failed' });
+
+      if (errors.length > 0) {
+        showToast({
+          type: 'warning',
+          title: 'Sync completed with warnings',
+          message: errors.join('; '),
+        });
+      } else {
+        showToast({
+          type: 'info',
+          title: 'All Inboxes Synced',
+          message: totalNewFetched > 0
+            ? `Fetched ${totalNewFetched} new message${totalNewFetched > 1 ? 's' : ''}`
+            : `Mailboxes are up to date`,
+        });
+      }
+    } catch (e: any) {
+      showToast({ type: 'error', title: 'Sync failed', message: e?.message || '' });
     } finally {
       setIsSyncing(false);
     }
   }, [accounts, showToast]);
+
+  // Initial auto-sync on launch
+  useEffect(() => {
+    if (apiBridge.isElectron()) {
+      syncAllAccounts();
+    }
+  }, []);
 
   const updateSettings = useCallback((newSettings: Partial<AppSettings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
