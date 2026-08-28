@@ -90,7 +90,7 @@ interface MailContextType {
   };
 }
 
-const MailContext = createContext<MailContextType | null>(null);
+export const MailContext = createContext<MailContextType | null>(null);
 
 export const MailProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [accounts, setAccounts] = useState<Account[]>(() => storageService.loadAccounts());
@@ -768,10 +768,4 @@ export const MailProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
-export const useMail = () => {
-  const context = useContext(MailContext);
-  if (!context) {
-    throw new Error('useMail must be used within a MailProvider');
-  }
-  return context;
-};
+export { useMail } from './useMail';

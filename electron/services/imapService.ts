@@ -31,12 +31,18 @@ export const imapService = {
       emitLogs: false,
     });
 
+    // Prevent uncaught error event crash in Node.js event emitter
+    client.on('error', (err) => {
+      // Handled silently
+    });
+
     try {
       await client.connect();
-      await client.logout();
+      try {
+        await client.logout();
+      } catch (_) {}
       return { success: true };
     } catch (err: any) {
-      console.error('IMAP testConnection error:', err);
       const errorDetail =
         err.responseText ||
         err.response ||
@@ -46,6 +52,10 @@ export const imapService = {
         success: false,
         error: errorDetail,
       };
+    } finally {
+      try {
+        await client.logout();
+      } catch (_) {}
     }
   },
 
@@ -68,6 +78,11 @@ export const imapService = {
       },
       logger: false,
       emitLogs: false,
+    });
+
+    // Prevent uncaught error event crash in Node.js event emitter
+    client.on('error', (err) => {
+      // Handled silently
     });
 
     const messages: any[] = [];
@@ -176,14 +191,15 @@ export const imapService = {
         lock.release();
       }
 
-      await client.logout();
+      try {
+        await client.logout();
+      } catch (_) {}
 
       // Sort newest first
       messages.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
       return { success: true, messages };
     } catch (err: any) {
-      console.error('IMAP sync error:', err);
       const errorDetail =
         err.responseText ||
         err.response ||
@@ -194,6 +210,10 @@ export const imapService = {
         messages: [],
         error: errorDetail,
       };
+    } finally {
+      try {
+        await client.logout();
+      } catch (_) {}
     }
   },
 };

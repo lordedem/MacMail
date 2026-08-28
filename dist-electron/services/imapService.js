@@ -16,13 +16,19 @@ exports.imapService = {
             logger: false,
             emitLogs: false,
         });
+        // Prevent uncaught error event crash in Node.js event emitter
+        client.on('error', (err) => {
+            // Handled silently
+        });
         try {
             await client.connect();
-            await client.logout();
+            try {
+                await client.logout();
+            }
+            catch (_) { }
             return { success: true };
         }
         catch (err) {
-            console.error('IMAP testConnection error:', err);
             const errorDetail = err.responseText ||
                 err.response ||
                 (err.authenticationFailed ? 'Authentication failed: Invalid username or password.' : err.message) ||
@@ -31,6 +37,12 @@ exports.imapService = {
                 success: false,
                 error: errorDetail,
             };
+        }
+        finally {
+            try {
+                await client.logout();
+            }
+            catch (_) { }
         }
     },
     async fetchRecentMessages(account, mailbox = 'INBOX', limit = 50) {
@@ -47,6 +59,10 @@ exports.imapService = {
             },
             logger: false,
             emitLogs: false,
+        });
+        // Prevent uncaught error event crash in Node.js event emitter
+        client.on('error', (err) => {
+            // Handled silently
         });
         const messages = [];
         try {
@@ -143,13 +159,15 @@ exports.imapService = {
             finally {
                 lock.release();
             }
-            await client.logout();
+            try {
+                await client.logout();
+            }
+            catch (_) { }
             // Sort newest first
             messages.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
             return { success: true, messages };
         }
         catch (err) {
-            console.error('IMAP sync error:', err);
             const errorDetail = err.responseText ||
                 err.response ||
                 (err.authenticationFailed ? 'Authentication failed: Invalid credentials.' : err.message) ||
@@ -159,6 +177,12 @@ exports.imapService = {
                 messages: [],
                 error: errorDetail,
             };
+        }
+        finally {
+            try {
+                await client.logout();
+            }
+            catch (_) { }
         }
     },
 };
